@@ -1,0 +1,206 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
+using System.Windows.Shapes;
+
+namespace WpfApplication1
+{
+    /// <summary>
+    /// Interaction logic for MainWindow.xaml
+    /// </summary>
+    public partial class MainWindow : Window
+    {
+        public MainWindow()
+        {
+            InitializeComponent();
+        }
+
+        public int RetFormatChar(string tFormatStr, ref int tFormatIndex)
+        {
+            // FormatString     FormatCh          Descr
+            //  \\              260               The char \
+            //  \"              261               The char "
+            //  \*              262               The char*
+            //  \n              265               The char 13
+            //  \r              266               The char 10
+            //  \V              268               Variable
+            //  *               267               Any char
+            //  abc             Char Value        Text to search for
+            //  EndOfString     510               End of string
+
+            if (tFormatIndex >= tFormatStr.Length) return 510; //End of string
+            
+            if (tFormatStr[tFormatIndex] == '\\')
+            {
+                tFormatIndex++;
+                if (tFormatIndex >= tFormatStr.Length) return 510; //End of string
+                switch (tFormatStr[tFormatIndex])
+                {
+                    case '\\': tFormatIndex++; return 260; break; // "\\" The char \
+                    case '\"': tFormatIndex++; return 261; break; // "\"" The char "
+                    case '*':  tFormatIndex++; return 262; break; // "*" The char *
+                    case 'n':  tFormatIndex++; return 265; break; // "\n" The char \n (13)
+                    case 'r':  tFormatIndex++; return 266; break; // "\r" The char \r (10)
+                    case 'V':  tFormatIndex++; return 268; break; // "\V" The char \V
+                }
+            }
+            else
+            {
+                switch (tFormatStr[tFormatIndex])
+                {
+                    case '*': tFormatIndex++; return 267; break; // "*" The char *
+                    default:  
+                        int tInt = tFormatStr[tFormatIndex]; 
+                        tFormatIndex++; return tInt; 
+                        break; // Any other char
+                }
+            }
+            return 0;
+        }
+
+        public void MiniParseLine(string tInLine, ref string[] tOutStrings)
+        {
+            // FormatString     FormatCh          Descr
+            //  \\              260               The char \
+            //  \"              261               The char "
+            //  \*              262               The char*
+            //  \n              265               The char 13
+            //  \r              266               The char 10
+            //  \V              268               Variable
+            //  *               267               Any char
+            //  abc             Char Value        Text to search for
+
+            string InStr = ",/qwerty1234qwerty,asdf gh,zxcvbn,";
+            string FormatStr = @",\V1\V,\V,\V,";
+
+            InStr = ",/qwerty1234qwerty,asdf gh,zxcvbn,";
+            FormatStr = @",*rty1234*   ,*f gh  ";
+
+            int CurrInIndex = 0;
+            int CurrFormatIndex = 0;
+            int[] CurrFormatCh = new int[2];
+
+
+            //CurrInCh = '\\';
+
+            //if (CurrInCh == '\\') ;
+
+
+            //Read the first char in strings
+            int CurrInCh = InStr[CurrInIndex];
+            //CurrFormatCh = FormatStr[CurrFormatIndex];
+            /*
+            do
+            {
+                if(CurrFormatCh == )
+
+
+
+
+            }
+            while (CurrInIndex < InStr.Length);*/
+
+
+#if (false)
+            Array.Resize(ref tOutStrings, 5);
+
+            bool DoPrintOut = false;
+            List<string> tokens = new List<string>();
+
+            int last = -1;
+            int current = 0;
+            bool inText = false;
+
+            //char[] arrText = csvText.ToCharArray(); //csvText.Length
+            int StrLen = tInLine.Length;
+            string ffff;
+
+            while (current < tInLine.Length)
+            {
+                char tCh = tInLine[current];
+                if (tCh == L2Char)
+                { 
+                    inText = !inText; 
+                }
+                else
+                if (tCh == L1Char) //If text L1 starts
+                {
+                    if (ConSeqChar == false)
+                    {
+                        if (!inText)
+                        {   //Remove L1Char from each end
+                            tokens.Add(tInLine.Substring(last + 1, (current - last)).Trim(L1Char));
+                            ffff = tInLine.Substring(last + 1, (current - last)).Trim(L1Char);
+                            last = current;
+                        }
+                    }
+                    else
+                    {
+                        if (!inText)
+                        {   //Avoid exceptions
+                            if (current > 0 && current < StrLen - 1) //if (current > 0 && current < StrLen - 2)
+                            {
+                                string tStr = tInLine.Substring(current, 2);
+                                string tCmpStr = L1Char.ToString() + L1Char.ToString();
+                                if (tStr != tCmpStr)
+                                {   //Remove L1Char from each end
+                                    tokens.Add(tInLine.Substring(last + 1, (current - last)).Trim(L1Char));
+                                    ffff = tInLine.Substring(last + 1, (current - last)).Trim(L1Char);
+                                    last = current;
+                                }
+                            }
+                        }
+                    }
+                }
+                current++;
+            }
+
+            //Add another string if the last is a L1Char
+            if (tInLine.Substring(tInLine.Length - 1, 1)[0] == L1Char) tokens.Add("");
+
+            if (last != tInLine.Length - 1)
+                tokens.Add(tInLine.Substring(last + 1).Trim());
+
+            if (DoPrintOut == true)
+            {
+                for (int i = 0; i < tokens.Count; i++)
+                {
+                    string tt1 = i.ToString("D2") + ":|" + tokens[i] + "|";
+                    Console.WriteLine(tt1);
+                }
+            }
+            return tokens.ToArray();
+#endif
+        }
+
+        private void btnTest_Click(object sender, RoutedEventArgs e)
+        {
+            int i = 0;
+            int e1 = 0;
+            string FormatStr = @",\V1\V,\V,\V,";
+            FormatStr = @",\V1\V,\V,\V,";
+            FormatStr = "\\\\0123\\\"0123\\**\\n\\r0123\\V*";
+
+            Console.WriteLine("012345678901234567890123456789");
+            Console.WriteLine(FormatStr);
+
+            do
+            {
+                int j = i;
+                e1 = RetFormatChar(FormatStr, ref i);
+                Console.WriteLine(j.ToString() + ":" + e1.ToString());
+            }
+            while (e1 != 510);
+        }
+    }
+}
