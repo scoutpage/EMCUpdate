@@ -4,7 +4,6 @@ using System.Runtime.InteropServices;
 using System.Text;
 
 // Change this to match your program's normal namespace
-namespace IniMiniFile //test with alll
 {
     class IniFile   // revision 11
     {

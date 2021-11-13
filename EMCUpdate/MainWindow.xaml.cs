@@ -347,7 +347,7 @@ namespace EMCUpdate
                 tIniElement = new clsIniFileTopLevel(); tIniElement.ResetAll();
                 EntryIndex++;
                 MoreEntries = tIniElement.ReadIniFile(InFileName, EntryIndex);
-            }
+        }
             while (MoreEntries == true);
 
             if(EntryIndex > 1) return true;
@@ -891,7 +891,35 @@ namespace EMCUpdate
 
         private void btnTest_Click(object sender, RoutedEventArgs e)
         {
+            int i = 34; char c;
+            c = Convert.ToChar(34); Console.WriteLine(c.ToString());
+            c = Convert.ToChar(9); Console.WriteLine(c.ToString());
+            c = Convert.ToChar(45); Console.WriteLine(c.ToString());
+            c = Convert.ToChar(65); Console.WriteLine(c.ToString());
+            Console.WriteLine("asdfasdfasfasfasdfas");
+
+            double aa = 65;
+            char s = Convert.ToChar((int)aa); Console.WriteLine(s.ToString());
+
+
+            clsFileInfo ddd = new clsFileInfo();
+
+            ddd.ReadIniFile(@"j:\Docs\VSPrj\EMCUpdate\EMCUpdate\bin\Debug\Values.ini", 1);
+
+            return;
             ReadIniFile("");
+            FindFile(ref BWInput1);
+
+            return;
+            string t1, t2;
+            t1 = "111.txt"; t2 = "*"; Console.WriteLine(t1 + "/" + t2 + ": " + FilenameMatchesPattern(t1, t2).ToString());
+            t1 = "abc48235.txt"; t2 = "abc*"; Console.WriteLine(t1 + "/" + t2 + ": " + FilenameMatchesPattern(t1, t2).ToString());
+            t1 = "abc48235.txt"; t2 = "abc*.*"; Console.WriteLine(t1 + "/" + t2 + ": " + FilenameMatchesPattern(t1, t2).ToString());
+            t1 = "789abc456.txt"; t2 = "*abc*.*"; Console.WriteLine(t1 + "/" + t2 + ": " + FilenameMatchesPattern(t1, t2).ToString());
+            t1 = "789abc456.txt"; t2 = "*abc*"; Console.WriteLine(t1 + "/" + t2 + ": " + FilenameMatchesPattern(t1, t2).ToString());
+
+            t1 = "789abc456.txt"; t2 = "*abc7*"; Console.WriteLine(t1 + "/" + t2 + ": " + FilenameMatchesPattern(t1, t2).ToString());
+            t1 = "789abc456.txt"; t2 = "abc*"; Console.WriteLine(t1 + "/" + t2 + ": " + FilenameMatchesPattern(t1, t2).ToString());
         }
 
         string RetLine(string InText, int StartIndex, ref int NewStartIndex, ref bool IsEndOfString)
@@ -1326,6 +1354,9 @@ namespace EMCUpdate
         public string FilePattern;
         public string FileName;
         public string FilePath;
+        public int UpdateFreqMS;
+        public int ErrorDisplayDelay;
+        public int ErrorDisplayDelayCnt;
 
         //Variables concerning values read - read from the ini-file
         //public List<double> dblNominal; //Nominal00=10
@@ -1351,6 +1382,9 @@ namespace EMCUpdate
             FilePattern = "";
             FileName = "";
             FilePath = "";
+            UpdateFreqMS = 200;
+            ErrorDisplayDelay = (1000 / UpdateFreqMS) * 2;
+            ErrorDisplayDelayCnt = 0;
 
             //Variables concerning values read - read from the ini-file
             strNominal = new List<string>();
@@ -1367,6 +1401,18 @@ namespace EMCUpdate
 
         public void ResetAll()
         {
+            //Variables concerning the format of the line - read from the ini-file
+            DividerL0 = '\t'; //DividerL0=9  //Tab
+            DividerL1 = '\"'; //DividerL1=34 //"
+            ConSeqDiv = true; //ConSeqDiv=true
+            FirstLine = 1;    //FirstLine=1
+            FilePattern = "*.txt";
+            FileName = "MyTest.txt";
+            FilePath = "";
+            UpdateFreqMS = 200;
+            ErrorDisplayDelay = (1000 / UpdateFreqMS) * 2;
+            ErrorDisplayDelayCnt = 0;
+
             //Variables concerning values read - read from the ini-file
             strNominal.Clear(); Min.Clear(); Max.Clear(); InfoType.Clear();
 
@@ -1382,7 +1428,7 @@ namespace EMCUpdate
             if (Corrects.Count < strNominal.Count)
             {
                 for (int j = Corrects.Count; j < strNominal.Count; j++)
-                {
+        {
                     Corrects.Add(0); Corrects[j] = 0;
                     Wrongs.Add(0); Wrongs[j] = 0;
                     PrevCorrects.Add(0); PrevCorrects[j] = 0;
@@ -1409,13 +1455,16 @@ namespace EMCUpdate
             {
                 FilePath = tFilePath;
                 FilePattern = tFilePattern;
+                UpdateFreqMS = tUpdateFreqMS;
+                ErrorDisplayDelay = (1000 / UpdateFreqMS) * 2;
+                ErrorDisplayDelayCnt = 0;
                 return true;
             }
             return false;
         }
 
         public void AddNumberValues(double tMin, double tMax, string tStrNom, string tInfoType)
-        {
+                {
             Min.Add(tMin);
             Max.Add(tMax);
             strNominal.Add(tStrNom);
