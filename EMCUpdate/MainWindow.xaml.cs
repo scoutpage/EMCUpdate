@@ -30,8 +30,10 @@ namespace EMCUpdate
     public partial class MainWindow : Window
     {
         BackgroundWorker bw = new BackgroundWorker();
-        clsFileInfo BWInput1;
-        clsFileInfo BWInput2;
+        List<clsIniFileTopLevel> arrIniObj = new List<clsIniFileTopLevel>();
+
+        clsIniFileTopLevel BWInput1;
+        clsIniFileTopLevel BWInput2;
         bool StopMonitoring;
         bool ErrorDuringFileRead;
 
@@ -55,47 +57,305 @@ namespace EMCUpdate
 
             tblTest.Text = "Idle";
             EMCMainForm.Title = "EMCUpdate - Idle";
+
+            //--------------------------------------------------------
+            AddToComboBoxDividerChars(cboDivL0);
+            AddToComboBoxDividerChars(cboDivL1);
+            AddToComboBoxConSeqDiv(cboConSeqDiv);
         }
 
-        static clsFileInfo FillFileInfo_NotUsed(string tFileStr)
+        private void AddToComboBoxDividerChars(System.Windows.Controls.ComboBox tComboBox)
         {
-            clsFileInfo tFileInfo = new clsFileInfo();
+            tComboBox.Items.Add("NULL (#000-Null char.)");
+            tComboBox.Items.Add("SOH  (#001-Start of Header)");
+            tComboBox.Items.Add("STX  (#002-Start of Text)");
+            tComboBox.Items.Add("ETX  (#003-End of Text, hearts card suit)");
+            tComboBox.Items.Add("EOT  (#004-End of Transmission, diamonds card suit)");
+            tComboBox.Items.Add("ENQ  (#005-Enquiry, clubs card suit)");
+            tComboBox.Items.Add("ACK  (#006-Acknowledgement, spade card suit)");
+            tComboBox.Items.Add("BEL  (#007-Bell)");
+            tComboBox.Items.Add("BS   (#008-BSpace)");
+            tComboBox.Items.Add("HT   (#009-Hor. Tab)");
+            tComboBox.Items.Add("LF   (#010-Line feed)");
+            tComboBox.Items.Add("VT   (#011-Vert. Tab)");
+            tComboBox.Items.Add("FF   (#012-Form feed)");
+            tComboBox.Items.Add("CR   (#013-Carriage return)");
+            tComboBox.Items.Add("SO   (#014-Shift Out)");
+            tComboBox.Items.Add("SI   (#015-Shift In)");
+            tComboBox.Items.Add("DLE  (#016-Data link escape)");
+            tComboBox.Items.Add("DC1  (#017-Device control 1)");
+            tComboBox.Items.Add("DC2  (#018-Device control 2)");
+            tComboBox.Items.Add("DC3  (#019-Device control 3)");
+            tComboBox.Items.Add("DC4  (#020-Device control 4)");
+            tComboBox.Items.Add("NAK  (#021-NAK Neg.-Ack.)");
+            tComboBox.Items.Add("SYN  (#022-Sync. idle))");
+            tComboBox.Items.Add("ETB  (#023-End of trans. block)");
+            tComboBox.Items.Add("CAN  (#024-Cancel)");
+            tComboBox.Items.Add("EM   (#025-End of medium)");
+            tComboBox.Items.Add("SUB  (#026-Substitute)");
+            tComboBox.Items.Add("ESC  (#027-Escape)");
+            tComboBox.Items.Add("FS   (#028-File separator)");
+            tComboBox.Items.Add("GS   (#029-Group separator)");
+            tComboBox.Items.Add("RS   (#030-Record separator)");
+            tComboBox.Items.Add("US   (#031-Unit separator)");
+            tComboBox.Items.Add("Spc  (#032-Space)");
+            tComboBox.Items.Add("!    (#033-Exclamation mark)");
+            tComboBox.Items.Add("\"    (#034-Double quotes)");
+            tComboBox.Items.Add("#    (#035-Number sign)");
+            tComboBox.Items.Add("$    (#036-Dollar sign)");
+            tComboBox.Items.Add("%    (#037-Percent sign)");
+            tComboBox.Items.Add("&    (#038-Ampersand)");
+            tComboBox.Items.Add("'    (#039-Sngl quote)");
+            tComboBox.Items.Add("(    (#040-Open parentheses)");
+            tComboBox.Items.Add(")    (#041-Closing parentheses)");
+            tComboBox.Items.Add("*    (#042-Asterisk)");
+            tComboBox.Items.Add("+    (#043-Plus sign)");
+            tComboBox.Items.Add(",    (#044-Comma)");
+            tComboBox.Items.Add("-    (#045-Minus sign)");
+            tComboBox.Items.Add(".    (#046-Dot, full stop)");
+            tComboBox.Items.Add("/    (#047-Forward slash)");
+            tComboBox.Items.Add("0    (#048-Number zero)");
+            tComboBox.Items.Add("1    (#049-Number one)");
+            tComboBox.Items.Add("2    (#050-Number two)");
+            tComboBox.Items.Add("3    (#051-Number three)");
+            tComboBox.Items.Add("4    (#052-Number four)");
+            tComboBox.Items.Add("5    (#053-Number five)");
+            tComboBox.Items.Add("6    (#054-Number six)");
+            tComboBox.Items.Add("7    (#055-Number seven)");
+            tComboBox.Items.Add("8    (#056-Number eight)");
+            tComboBox.Items.Add("9    (#057-Number nine)");
+            tComboBox.Items.Add(":    (#058-Colon)");
+            tComboBox.Items.Add(";    (#059-Semicolon)");
+            tComboBox.Items.Add("<    (#060-Less-than)");
+            tComboBox.Items.Add("=    (#061-Equals sign)");
+            tComboBox.Items.Add(">    (#062-Greater-than)");
+            tComboBox.Items.Add("?    (#063-Question mark)");
+            tComboBox.Items.Add("@    (#064-At sign)");
+            tComboBox.Items.Add("A    (#065-UCase A)");
+            tComboBox.Items.Add("B    (#066-UCase B)");
+            tComboBox.Items.Add("C    (#067-UCase C)");
+            tComboBox.Items.Add("D    (#068-UCase D)");
+            tComboBox.Items.Add("E    (#069-UCase E)");
+            tComboBox.Items.Add("F    (#070-UCase F)");
+            tComboBox.Items.Add("G    (#071-UCase G)");
+            tComboBox.Items.Add("H    (#072-UCase H)");
+            tComboBox.Items.Add("I    (#073-UCase I)");
+            tComboBox.Items.Add("J    (#074-UCase J)");
+            tComboBox.Items.Add("K    (#075-UCase K)");
+            tComboBox.Items.Add("L    (#076-UCase L)");
+            tComboBox.Items.Add("M    (#077-UCase M)");
+            tComboBox.Items.Add("N    (#078-UCase N)");
+            tComboBox.Items.Add("O    (#079-UCase O)");
+            tComboBox.Items.Add("P    (#080-UCase P)");
+            tComboBox.Items.Add("Q    (#081-UCase Q)");
+            tComboBox.Items.Add("R    (#082-UCase R)");
+            tComboBox.Items.Add("S    (#083-UCase S)");
+            tComboBox.Items.Add("T    (#084-UCase T)");
+            tComboBox.Items.Add("U    (#085-UCase U)");
+            tComboBox.Items.Add("V    (#086-UCase V)");
+            tComboBox.Items.Add("W    (#087-UCase W)");
+            tComboBox.Items.Add("X    (#088-UCase X)");
+            tComboBox.Items.Add("Y    (#089-UCase Y)");
+            tComboBox.Items.Add("Z    (#090-UCase Z)");
+            tComboBox.Items.Add("[    (#091-Opening bracket)");
+            tComboBox.Items.Add("\\    (#092-Reverse slash)");
+            tComboBox.Items.Add("]    (#093-Closing bracket)");
+            tComboBox.Items.Add("^    (#094-Accent)");
+            tComboBox.Items.Add("_    (#095-Underscore)");
+            tComboBox.Items.Add("`    (#096-Left accent)");
+            tComboBox.Items.Add("a    (#097-LCase a)");
+            tComboBox.Items.Add("b    (#098-LCase b)");
+            tComboBox.Items.Add("c    (#099-LCase c)");
+            tComboBox.Items.Add("d    (#100-LCase d)");
+            tComboBox.Items.Add("e    (#101-LCase e)");
+            tComboBox.Items.Add("f    (#102-LCase f)");
+            tComboBox.Items.Add("g    (#103-LCase g)");
+            tComboBox.Items.Add("h    (#104-LCase h)");
+            tComboBox.Items.Add("i    (#105-LCase i)");
+            tComboBox.Items.Add("j    (#106-LCase j)");
+            tComboBox.Items.Add("k    (#107-LCase k)");
+            tComboBox.Items.Add("l    (#108-LCase l)");
+            tComboBox.Items.Add("m    (#109-LCase m)");
+            tComboBox.Items.Add("n    (#110-LCase n)");
+            tComboBox.Items.Add("o    (#111-LCase o)");
+            tComboBox.Items.Add("p    (#112-LCase p)");
+            tComboBox.Items.Add("q    (#113-LCase q)");
+            tComboBox.Items.Add("r    (#114-LCase r)");
+            tComboBox.Items.Add("s    (#115-LCase s)");
+            tComboBox.Items.Add("t    (#116-LCase t)");
+            tComboBox.Items.Add("u    (#117-LCase u)");
+            tComboBox.Items.Add("v    (#118-LCase v)");
+            tComboBox.Items.Add("w    (#119-LCase w)");
+            tComboBox.Items.Add("x    (#120-LCase x)");
+            tComboBox.Items.Add("y    (#121-LCase y)");
+            tComboBox.Items.Add("z    (#122-LCase z)");
+            tComboBox.Items.Add("{    (#123-Opening braces)");
+            tComboBox.Items.Add("|    (#124-VBar)");
+            tComboBox.Items.Add("}    (#125-Closing braces)");
+            tComboBox.Items.Add("~    (#126-Tilde)");
+            tComboBox.Items.Add("DEL  (#127-Delete)");
+            tComboBox.Items.Add("Ç    (#128-Majuscule C-cedilla)");
+            tComboBox.Items.Add("ü    (#129-Char. u /w umlaut)");
+            tComboBox.Items.Add("é    (#130-Char. e /w right accent)");
+            tComboBox.Items.Add("â    (#131-Char. a /w circ. accent)");
+            tComboBox.Items.Add("ä    (#132-Char. a /w umlaut)");
+            tComboBox.Items.Add("à    (#133-Char. a /w left accent)");
+            tComboBox.Items.Add("å    (#134-Char. a /w a ring)");
+            tComboBox.Items.Add("ç    (#135-Minuscule c-cedilla)");
+            tComboBox.Items.Add("ê    (#136-Char. e /w circ. accent)");
+            tComboBox.Items.Add("ë    (#137-Char. e /w umlaut)");
+            tComboBox.Items.Add("è    (#138-Char. e /w left accent)");
+            tComboBox.Items.Add("ï    (#139-Char. i /w umlaut)");
+            tComboBox.Items.Add("î    (#140-Char. i /w circ. accent)");
+            tComboBox.Items.Add("ì    (#141-Char. i /w left accent)");
+            tComboBox.Items.Add("Ä    (#142-Char. A /w umlaut)");
+            tComboBox.Items.Add("Å    (#143-UCase A w/ a ring)");
+            tComboBox.Items.Add("É    (#144-UCase E w/ right accent)");
+            tComboBox.Items.Add("æ    (#145-LCase ae)");
+            tComboBox.Items.Add("Æ    (#146-UCase AE)");
+            tComboBox.Items.Add("ô    (#147-Char. o w/ circ. accent)");
+            tComboBox.Items.Add("ö    (#148-Char. o w/ umlaut)");
+            tComboBox.Items.Add("ò    (#149-Char. o w/ left accent)");
+            tComboBox.Items.Add("û    (#150-Char. u w/ circ. accent)");
+            tComboBox.Items.Add("ù    (#151-Char. u w/ left accent)");
+            tComboBox.Items.Add("ÿ    (#152-LCase y w/ diaeresis)");
+            tComboBox.Items.Add("Ö    (#153-Char. O w/ umlaut)");
+            tComboBox.Items.Add("Ü    (#154-Char. U w/ umlaut)");
+            tComboBox.Items.Add("ø    (#155-LCase Ø)");
+            tComboBox.Items.Add("£    (#156-Pound sign)");
+            tComboBox.Items.Add("Ø    (#157-UCase Ø)");
+            tComboBox.Items.Add("×    (#158-Star)");
+            tComboBox.Items.Add("ƒ    (#159-Function sign)");
+            tComboBox.Items.Add("á    (#160-LCase a w/ accent)");
+            tComboBox.Items.Add("í    (#161-LCase i w/ accent)");
+            tComboBox.Items.Add("ó    (#162-LCase o w/ accent)");
+            tComboBox.Items.Add("ú    (#163-LCase u w/ accent)");
+            tComboBox.Items.Add("ñ    (#164-LCase n w/ tilde)");
+            tComboBox.Items.Add("Ñ    (#165-UCase N w/ tilde)");
+            tComboBox.Items.Add("ª    (#166-Fem. ord. indicator)");
+            tComboBox.Items.Add("º    (#167-Male ord. indicator)");
+            tComboBox.Items.Add("¿    (#168-Inv. ?)");
+            tComboBox.Items.Add("®    (#169-Reg. trademark)");
+            tComboBox.Items.Add("¬    (#170-Log. neg. symbol)");
+            tComboBox.Items.Add("½    (#171-One half)");
+            tComboBox.Items.Add("¼    (#172-One Quart)");
+            tComboBox.Items.Add("¡    (#173-Inv. !)");
+            tComboBox.Items.Add("«    (#174-Right quot. mark)");
+            tComboBox.Items.Add("»    (#175-Left quot. mark)");
+            tComboBox.Items.Add("░    (#176-Low density dotted)");
+            tComboBox.Items.Add("▒    (#177-Med. density dotted)");
+            tComboBox.Items.Add("▓    (#178-High density dotted)");
+            tComboBox.Items.Add("│    (#179-Box draw. char. sngl vert. line)");
+            tComboBox.Items.Add("┤    (#180-Box draw. char. sngl vert. & left line)");
+            tComboBox.Items.Add("Á    (#181-UCase A w/ right accent or A-Right)");
+            tComboBox.Items.Add("Â    (#182-A w/ circ. accent)");
+            tComboBox.Items.Add("À    (#183-A w/ left accent)");
+            tComboBox.Items.Add("©    (#184-Copyright)");
+            tComboBox.Items.Add("╣    (#185-Box draw. char. dbl line ver. & left)");
+            tComboBox.Items.Add("║    (#186-Box draw. char. dbl vert. line)");
+            tComboBox.Items.Add("╗    (#187-Box draw. char. dbl line upper right corner)");
+            tComboBox.Items.Add("╝    (#188-Box draw. char. dbl line lower right corner)");
+            tComboBox.Items.Add("¢    (#189-Cent symbol)");
+            tComboBox.Items.Add("¥    (#190-YEN and YUAN sign)");
+            tComboBox.Items.Add("┐    (#191-Box draw. char. sngl line upper right corner)");
+            tComboBox.Items.Add("└    (#192-Box draw. char. sngl line lower left corner)");
+            tComboBox.Items.Add("┴    (#193-Box draw. char. sngl line hor. & up)");
+            tComboBox.Items.Add("┬    (#194-Box draw. char. sngl line hor. down)");
+            tComboBox.Items.Add("├    (#195-Box draw. char. sngl line vert. & right)");
+            tComboBox.Items.Add("─    (#196-Box draw. char. sngl hor. line)");
+            tComboBox.Items.Add("┼    (#197-Box draw. char. sngl line hor. vert.)");
+            tComboBox.Items.Add("ã    (#198-LCase a w/ tilde or a-tilde)");
+            tComboBox.Items.Add("Ã    (#199-UCase A w/ tilde or A-tilde)");
+            tComboBox.Items.Add("╚    (#200-Box draw. char. dbl line lower left corner)");
+            tComboBox.Items.Add("╔    (#201-Box draw. char. dbl line upper left corner)");
+            tComboBox.Items.Add("╩    (#202-Box draw. char. dbl line hor. and up)");
+            tComboBox.Items.Add("╦    (#203-Box draw. char. dbl line hor. down)");
+            tComboBox.Items.Add("╠    (#204-Box draw. char. dbl line vert. and right)");
+            tComboBox.Items.Add("═    (#205-Box draw. char. dbl hor. line)");
+            tComboBox.Items.Add("╬    (#206-Box draw. char. dbl line hor. vert.)");
+            tComboBox.Items.Add("¤    (#207-Generic currency sign)");
+            tComboBox.Items.Add("ð    (#208-LCase eth)");
+            tComboBox.Items.Add("Ð    (#209-UCase Eth)");
+            tComboBox.Items.Add("Ê    (#210-Char. E w/ circ. accent)");
+            tComboBox.Items.Add("Ë    (#211-Char. E w/ umlaut)");
+            tComboBox.Items.Add("È    (#212-UCase E w/ left accent)");
+            tComboBox.Items.Add("ı    (#213-Lowercase dot less i)");
+            tComboBox.Items.Add("Í    (#214-UCase I w/ right accent)");
+            tComboBox.Items.Add("Î    (#215-Char. I w/ circ. accent)");
+            tComboBox.Items.Add("Ï    (#216-Char. I w/ umlaut)");
+            tComboBox.Items.Add("┘    (#217-Box draw. char. sngl line LRight corner)");
+            tComboBox.Items.Add("┌    (#218-Box draw. char. sngl line ULeft corner)");
+            tComboBox.Items.Add("█    (#219-Block)");
+            tComboBox.Items.Add("▄    (#220-Bottom half block)");
+            tComboBox.Items.Add("¦    (#221-Vert. broken bar)");
+            tComboBox.Items.Add("Ì    (#222-UCase I w/ left accent)");
+            tComboBox.Items.Add("▀    (#223-Top half block)");
+            tComboBox.Items.Add("Ó    (#224-UCase O w/ right accent)");
+            tComboBox.Items.Add("ß    (#225-Dbl S)");
+            tComboBox.Items.Add("Ô    (#226-Char. O w/ circ. accent)");
+            tComboBox.Items.Add("Ò    (#227-UCase O w/ left accent)");
+            tComboBox.Items.Add("õ    (#228-LCase o w/ tilde)");
+            tComboBox.Items.Add("Õ    (#229-UCase O w/ tilde)");
+            tComboBox.Items.Add("µ    (#230-LCase Mu)");
+            tComboBox.Items.Add("þ    (#231-LCase Thorn)");
+            tComboBox.Items.Add("Þ    (#232-UCase Thorn)");
+            tComboBox.Items.Add("Ú    (#233-UCase U w/ right accent)");
+            tComboBox.Items.Add("Û    (#234-Char. U w/ circ. accent)");
+            tComboBox.Items.Add("Ù    (#235-UCase U w/ left accent)");
+            tComboBox.Items.Add("ý    (#236-LCase y w/ right accent)");
+            tComboBox.Items.Add("Ý    (#237-UCase Y w/ right accent)");
+            tComboBox.Items.Add("¯    (#238-Macron symbol)");
+            tComboBox.Items.Add("´    (#239-Right accent)");
+            tComboBox.Items.Add("≡    (#240-Congruence relation symbol)");
+            tComboBox.Items.Add("±    (#241-+/- sign)");
+            tComboBox.Items.Add("‗    (#242-Dbl underscore)");
+            tComboBox.Items.Add("¾    (#243-3/4)");
+            tComboBox.Items.Add("¶    (#244-Paragraph sign)");
+            tComboBox.Items.Add("§    (#245-Section sign)");
+            tComboBox.Items.Add("÷    (#246-Div. sign)");
+            tComboBox.Items.Add("¸    (#247-Cedilla)");
+            tComboBox.Items.Add("°    (#248-Degree symbol)");
+            tComboBox.Items.Add("¨    (#249-Diaresis)");
+            tComboBox.Items.Add("·    (#250-Space dot)");
+            tComboBox.Items.Add("¹    (#251-Exp 1)");
+            tComboBox.Items.Add("³    (#252-Exp 3)");
+            tComboBox.Items.Add("²    (#253-Exp 2)");
+            tComboBox.Items.Add("■    (#254-black square)");
+            tComboBox.Items.Add("NBSpc(#255-Non-breaking space)");
+        }
 
-            //Variables concerning the format of the line - read from the ini-file
-            tFileInfo.SetFormatValues('\t', '\"', true, 1); //DividerL0=9 (Tab), DividerL1=34 ("), ConSeqDiv=true, FirstLine=1
-            //tFileInfo.strFilePath = @"d:\Docs\Docs\ProgWork\VS\Visual Studio 2013\Projects\EMCUpdate\EMCUpdate\bin\Debug\MyTest.txt";
-            tFileInfo.FileName = tFileStr;
-
-            //#2021-05-28 00:20:01		0.20		01000		Rigtigt
-            //Variables concerning values read - read from the ini-file
-            tFileInfo.strNominal.Add("");
-            tFileInfo.Min.Add(-1);
-            tFileInfo.Max.Add(-1);
-            tFileInfo.InfoType.Add("Ignore");
-
-            tFileInfo.strNominal.Add("");
-            tFileInfo.Min.Add(0.18);
-            tFileInfo.Max.Add(0.23);
-            tFileInfo.InfoType.Add("Number");
-
-            tFileInfo.strNominal.Add("");
-            tFileInfo.Min.Add(800);
-            tFileInfo.Max.Add(1200);
-            tFileInfo.InfoType.Add("Number");
-
-            tFileInfo.strNominal.Add("Rigtigt");
-            tFileInfo.Min.Add(-1);
-            tFileInfo.Max.Add(-1);
-            tFileInfo.InfoType.Add("Text");
-
-            return tFileInfo;
+        private void AddToComboBoxConSeqDiv(System.Windows.Controls.ComboBox tComboBox)
+        {
+            tComboBox.Items.Add("Yes (Consequtive L0 chars)");
+            tComboBox.Items.Add("No (Each L0 chars)");
         }
 
         public bool ReadIniFile(string InFileName)
         {
-            clsFileInfo tBWInput1 = new clsFileInfo();
+            bool MoreEntries = false;
+            int EntryIndex = 1;
+            clsIniFileTopLevel tIniElement;
 
-            tBWInput1.SetFormatValues('\t', '\"', true, 1);
+            tIniElement = new clsIniFileTopLevel(); tIniElement.ResetAll();
+            arrIniObj.Clear();
+
+            MoreEntries = tIniElement.ReadIniFile(InFileName, EntryIndex);
+
+            while (MoreEntries == true)
+            {
+                arrIniObj.Add(tIniElement);
+                tIniElement = new clsIniFileTopLevel(); tIniElement.ResetAll();
+                EntryIndex++;
+                MoreEntries = tIniElement.ReadIniFile(InFileName, EntryIndex);
+            }
+            while (MoreEntries == true);
+
+            if(EntryIndex > 1) return true;
+            return false;
+
+            clsIniFileTopLevel tBWInput1 = new clsIniFileTopLevel();
+
+            tBWInput1.SetFormatValues('\t', '\"', true, 1, 2);
             tBWInput1.SetFilenameUpdate("", "*cLLD.txt", 200);
 
             tBWInput1.FilePath = @"d:\Docs\Docs\ProgWork\VS\Visual Studio 2013\Projects\EMCUpdate\EMCUpdate\bin\Debug";
@@ -147,7 +407,7 @@ namespace EMCUpdate
             return regex.IsMatch(filename);
         }
 
-        void FindFile(ref clsFileInfo tBWInput)
+        void FindFile(ref clsIniFileTopLevel tBWInput)
         {
             tBWInput.FilePath = tBWInput.FilePath.Trim();
             if (Directory.Exists(tBWInput.FilePath) == false)
@@ -245,7 +505,7 @@ namespace EMCUpdate
             return tDbl;
         }
 
-        private void PrintBWInputResults(string tStr, clsFileInfo tBWInput)
+        private void PrintBWInputResults(string tStr, clsIniFileTopLevel tBWInput)
         {
             Console.WriteLine("-" + tStr + "-");
 
@@ -270,7 +530,7 @@ namespace EMCUpdate
             Console.Write("\n");
         }
 
-        private bool InvestigateFile(ref clsFileInfo tBWInput)
+        private bool InvestigateFile(ref clsIniFileTopLevel tBWInput)
         {
             int NewStartLinePos = 0;
             int NewEndLinePos = 0;
@@ -295,7 +555,7 @@ namespace EMCUpdate
                     teststuff = "A3";
                     //Lines - read until first line
                     int LineCnt = 0;
-                    for(int i = 0; i < tBWInput.FirstLine; i++)
+                    for(int i = 0; i < tBWInput.FirstHdrLine; i++)
                     {
                         LineString = RetLine(CompleteFileText, NewStartLinePos, ref NewEndLinePos, ref IsEndOfString);
                         LineCnt++;
@@ -428,7 +688,7 @@ namespace EMCUpdate
             var Rnd = new Random();
 
             //clsFileInfo data = (clsFileInfo)stateInfo;
-            clsFileInfo data = new clsFileInfo();
+            clsIniFileTopLevel data = new clsIniFileTopLevel();
             DateTime LastFileDate = new DateTime();
             LastFileDate = DateTime.MinValue;
 
@@ -631,35 +891,7 @@ namespace EMCUpdate
 
         private void btnTest_Click(object sender, RoutedEventArgs e)
         {
-            int i = 34; char c;
-            c = Convert.ToChar(34); Console.WriteLine(c.ToString());
-            c = Convert.ToChar(9); Console.WriteLine(c.ToString());
-            c = Convert.ToChar(45); Console.WriteLine(c.ToString());
-            c = Convert.ToChar(65); Console.WriteLine(c.ToString());
-            Console.WriteLine("asdfasdfasfasfasdfas");
-
-            double aa = 65;
-            char s = Convert.ToChar((int)aa); Console.WriteLine(s.ToString());
-
-
-            clsFileInfo ddd = new clsFileInfo();
-
-            ddd.ReadIniFile(@"j:\Docs\VSPrj\EMCUpdate\EMCUpdate\bin\Debug\Values.ini", 1);
-
-            return;
             ReadIniFile("");
-            FindFile(ref BWInput1);
-
-            return;
-            string t1, t2;
-            t1 = "111.txt"; t2 = "*"; Console.WriteLine(t1 + "/" + t2 + ": " + FilenameMatchesPattern(t1, t2).ToString());
-            t1 = "abc48235.txt"; t2 = "abc*"; Console.WriteLine(t1 + "/" + t2 + ": " + FilenameMatchesPattern(t1, t2).ToString());
-            t1 = "abc48235.txt"; t2 = "abc*.*"; Console.WriteLine(t1 + "/" + t2 + ": " + FilenameMatchesPattern(t1, t2).ToString());
-            t1 = "789abc456.txt"; t2 = "*abc*.*"; Console.WriteLine(t1 + "/" + t2 + ": " + FilenameMatchesPattern(t1, t2).ToString());
-            t1 = "789abc456.txt"; t2 = "*abc*"; Console.WriteLine(t1 + "/" + t2 + ": " + FilenameMatchesPattern(t1, t2).ToString());
-
-            t1 = "789abc456.txt"; t2 = "*abc7*"; Console.WriteLine(t1 + "/" + t2 + ": " + FilenameMatchesPattern(t1, t2).ToString());
-            t1 = "789abc456.txt"; t2 = "abc*"; Console.WriteLine(t1 + "/" + t2 + ": " + FilenameMatchesPattern(t1, t2).ToString());
         }
 
         string RetLine(string InText, int StartIndex, ref int NewStartIndex, ref bool IsEndOfString)
@@ -726,7 +958,7 @@ namespace EMCUpdate
                 chkStop.IsChecked = false;
                 btnStartMonitoring.IsEnabled = false;
 
-                if (BWInput1 == null) BWInput1 = new clsFileInfo();
+                if (BWInput1 == null) BWInput1 = new clsIniFileTopLevel();
                 else BWInput1.ResetAll();
                 //string IniFilePath = @"d:\Docs\Docs\ProgWork\VS\Visual Studio 2013\Projects\EMCUpdate\EMCUpdate\bin\Debug\Values.ini";
                 string IniFilePath = @"j:\Docs\VSPrj\EMCUpdate\EMCUpdate\bin\Debug\Values.ini";
@@ -782,34 +1014,318 @@ namespace EMCUpdate
         }
     }
 
-    // Create a Person class  
-    public class clsFileInfo
+    // File top level
+    public class clsIniFileTopLevel
     {
         //Constants for ini-file
         //public const 
         public const string cstFileHdr = "File";            //[Filex]
         public const string cstFilePattern = "FilePattern"; //FilePattern
         public const string cstFilePath = "FilePath";       //FilePath
-        public const string cstDivider = "Divider";         //Divider
+        public const string cstDividerL0 = "DividerL0";     //Divider Level 0
+        public const string cstDividerL1 = "DividerL1";     //Divider Level 1
         public const string cstConSeqDiv = "ConSeqDiv";     //ConSeqDiv
-        public const string cstFirstLine = "FirstLine";     //FirstLine
+        public const string cstFirstHdrLine = "FirstHdrLine";   //FirsHdrtLine
+        public const string cstFirstDataLine = "FirstDataLine"; //FirsDatatLine
+        public const string cstUpdateFreqMS = "UpdateFreqMS";   //UpdateFreqMS
+        public const string cstErrorDisplayDelay = "ErrorDisplayDelay"; //ErrorDisplayDelay
 
         public const string cstNominal = "Nominal";         //Nominal00
         public const string cstMin = "Min";                 //Min00
         public const string cstMax = "Max";                 //Max00
         public const string cstInfoType = "InfoType";       //InfoType00
 
+        public string IniFileName; //The inifile nane
+
+        //Variables concerning the format of the line - read from the ini-file
+        public int UpdateFreqMS;
+        public int ErrorDisplayDelay; //Number of timer iterations so show an error
+        public int ErrorDisplayDelayCnt;
+
+        IniFile IniFileObj;
+
+        //Variables concerning values read - read from the ini-file
+        //public List<double> dblNominal; //Nominal00=10
+
+        //clsIniFileEntries iniFileEntries
+        public List<clsIniFileEntry> iniFileEntries;
+
+        public clsIniFileTopLevel()
+        {
+            //Variables concerning the format of the line - read from the ini-file
+            UpdateFreqMS = 200;
+            ErrorDisplayDelay = (1000 / UpdateFreqMS) * 2;
+            ErrorDisplayDelayCnt = 0;
+
+            IniFileObj = null;
+
+            //Variables concerning values read - read from the ini-file
+            iniFileEntries = new List<clsIniFileEntry>();
+
+            /*strNominal = new List<string>();
+            Min = new List<double>(); //Min00=8
+            Max = new List<double>(); //Max00=13
+            InfoType = new List<string>(); //InfoType00=Ignore*/
+
+            //Results from file reading
+            /*Corrects = new List<int>();
+            Wrongs = new List<int>();
+            PrevCorrects = new List<int>();
+            PrevWrongs = new List<int>();*/
+        }
+
+        //-------------- Reset --------------
+        public void ResetAll()
+        {
+            //Variables concerning the format of the line - read from the ini-file
+            UpdateFreqMS = -1;
+            ErrorDisplayDelay = -1; //(1000 / UpdateFreqMS) * 2;
+            ErrorDisplayDelayCnt = 0;
+
+            //Variables concerning values read - read from the ini-file
+            for(int i = 0; i < iniFileEntries.Count; i++)
+            {
+                iniFileEntries[i].ResetAll();
+            }
+        }
+
+        public void ResetCompareResults()
+        {
+            for (int i = 0; i < iniFileEntries.Count; i++)
+            {
+                iniFileEntries[i].ResetCompareResults();
+            }
+        }
+
+        //-------------- Setup --------------
+        public void SetFormatValues(int tFileIndex, char tDividerL0, char tDividerL1, bool tConSeqDiv, int tFirstHdrLine, int tFirstDataLine)
+        {
+            if(iniFileEntries.Count > tFileIndex)
+            {
+                clsIniFileEntry tiniFileEntries = new clsIniFileEntry();
+                iniFileEntries.Add(tiniFileEntries);
+            }
+            iniFileEntries[tFileIndex].SetFormatValues(tDividerL0, tDividerL1, tConSeqDiv, tFirstHdrLine, tFirstDataLine);
+
+        }
+
+        public void AddNumberValues(int tFileIndex, double tMin, double tMax, string tStrNom, string tInfoType)
+        {
+            if (iniFileEntries.Count > tFileIndex)
+            {
+                clsIniFileEntry tiniFileEntries = new clsIniFileEntry();
+                iniFileEntries.Add(tiniFileEntries);
+            }
+            iniFileEntries[tFileIndex].AddNumberValues(tMin, tMax, tStrNom, tInfoType);
+        }
+
+        public bool SetFilenameUpdate(int tFileIndex, string tFileName, string tFilePattern, int tUpdateFreqMS)
+        {
+            //if(File.Exists(tFilePattern) == true)
+            tFileName = tFileName.Trim();
+            tFilePattern = tFilePattern.Trim();
+            if (tFilePattern != "")
+            {
+
+                if (iniFileEntries.Count > tFileIndex)
+                {
+                    clsIniFileEntry tiniFileEntries = new clsIniFileEntry();
+                    iniFileEntries.Add(tiniFileEntries);
+                }
+                iniFileEntries[tFileIndex].SetFilenameUpdate(tFileName, tFilePattern);
+                UpdateFreqMS = tUpdateFreqMS;
+                ErrorDisplayDelay = (1000 / UpdateFreqMS) * 2;
+                ErrorDisplayDelayCnt = 0;
+                return true;
+            }
+            return false;
+        }
+
+        public double ConvertToDouble(string InValueString)
+        {
+            double tDbl;
+            InValueString = InValueString.Replace("\"", "");
+            try { tDbl = Convert.ToDouble(InValueString); }
+            catch (FormatException) { tDbl = double.MinValue; }
+            catch (OverflowException) { tDbl = double.MinValue; }
+            return tDbl;
+        }
+
+        /// <summary>
+        ///   Reading section about:
+        ///     F00_HdrText00="Net"
+        ///     F00_OutText00="Net"
+        ///     F00_InfoType00=Text
+        ///     If tstrConfigIniPath is left empty, the preset is used
+        /// </summary>
+        /// <param name="tstrConfigIniPath"></param>
+        /// <param name="tFileIndex"></param>
+        /// <param name="tiIndex"></param>
+        /// <returns></returns>
+        public bool ReadIniFile(string tstrConfigIniPath)
+        {
+            //Retrieve replace strings
+            bool bolFormatExists = false;
+            if (tstrConfigIniPath != "") IniFileName = tstrConfigIniPath;
+
+            if (File.Exists(IniFileName) == true)
+            {
+                if (IniFileObj == null)
+                    IniFileObj = new IniFile(IniFileName); //IniFile
+
+                //Create FileEntries
+                clsIniFileEntry tiniFileEntry = new clsIniFileEntry();
+
+                bolFormatExists = IniFileObj.KeyExists(cstFilePattern, "Main");
+                if (bolFormatExists == false) return false;
+
+                //Main
+                // UpdateFreqMS
+                string tStr = IniFileObj.Read(cstUpdateFreqMS, "Main");
+                double tDbl = ConvertToDouble(tStr.Trim());
+                if (tDbl > double.MinValue)
+                    UpdateFreqMS = Convert.ToChar((int)tDbl);
+                else return false;
+
+                // ErrorDisplayDelay
+                tStr = IniFileObj.Read(cstErrorDisplayDelay, "Main");
+                tDbl = ConvertToDouble(tStr.Trim());
+                if (tDbl > double.MinValue)
+                    ErrorDisplayDelay = Convert.ToChar((int)tDbl);
+                else return false;
+
+                //Numbered entries
+                iniFileEntries.Clear(); //clear Fileentries from the start
+                bool MoreEntries = true;
+                int k = 1;
+                string strHdr = cstFileHdr + k.ToString("D2"); //Create string "FileXX"
+                MoreEntries = IniFileObj.KeyExists(cstInfoType + k.ToString("D2"), strHdr); //Look for InfoTypeXX
+                while (MoreEntries == true) //FileXX entries
+                {
+                    //Main
+                    //FilePattern and FilePath
+                    string FilePattern = IniFileObj.Read(cstFilePattern, strHdr);
+                    FilePattern = FilePattern.Trim();
+                    string FilePath = IniFileObj.Read(cstFilePath, strHdr);
+                    FilePath = FilePath.Trim();
+                    //Enter data into structure
+                    tiniFileEntry.SetFilenameUpdate(FilePath, FilePattern);
+
+                    //Dividers
+                    char DividerL0 = ' '; char DividerL1 = ' ';
+                    tStr = IniFileObj.Read(cstDividerL0, strHdr);
+                    tDbl = ConvertToDouble(tStr.Trim());
+                    if (tDbl > double.MinValue)
+                        DividerL0 = Convert.ToChar((int)tDbl);
+                    else return false;
+
+                    tStr = IniFileObj.Read(cstDividerL1, strHdr);
+                    tDbl = ConvertToDouble(tStr.Trim());
+                    if (tDbl > double.MinValue)
+                        DividerL1 = Convert.ToChar((int)tDbl);
+                    else return false;
+
+                    //ConSeqDiv
+                    bool ConSeqDiv;
+                    tStr = IniFileObj.Read(cstConSeqDiv, strHdr);
+                    if (tStr.ToLower() == "true") ConSeqDiv = true;
+                    else if (tStr.ToLower() == "false") ConSeqDiv = false;
+                    else return false;
+
+                    //FirstHdrline
+                    int FirstHdrLine;
+                    tStr = IniFileObj.Read(cstFirstHdrLine, strHdr);
+                    tDbl = ConvertToDouble(tStr.Trim());
+                    if (tDbl > double.MinValue) FirstHdrLine = Convert.ToChar((int)tDbl);
+                    else return false;
+
+                    //FirstDataline
+                    int FirstDataLine;
+                    tStr = IniFileObj.Read(cstFirstDataLine, strHdr);
+                    tDbl = ConvertToDouble(tStr.Trim());
+                    if (tDbl > double.MinValue) FirstDataLine = Convert.ToChar((int)tDbl);
+                    else return false;
+
+                    //Enter data into structure
+                    tiniFileEntry.SetFormatValues(DividerL0, DividerL1, ConSeqDiv, FirstHdrLine, FirstDataLine);
+
+                    bool MoreEntries2 = true;
+                    int k2 = 0;
+                    //Find the "NominalXX", "MinXX", "MaxXX", "InfoTypeXX"
+                    MoreEntries2 = IniFileObj.KeyExists(cstInfoType + k.ToString("D2"), strHdr);
+                    while (MoreEntries2 == true) //FileXX entries
+                    {
+                        string tstrInfoType = "", tstrNominal = "";
+                        double tdblMin = 0, tdblMax = 0;
+                        tStr = IniFileObj.Read(cstInfoType + k2.ToString("D2"), strHdr);
+                        tstrInfoType = tStr.Trim();
+                        //InfoType.Add(tStr.Trim());
+                        if (tStr.ToLower() == "number")
+                        {
+                            //Min
+                            tStr = IniFileObj.Read(cstMin + k.ToString("D2"), strHdr);
+                            tDbl = ConvertToDouble(tStr.Trim());
+                            if (tDbl > double.MinValue)
+                                tdblMin = tDbl; //Min.Add(tDbl);
+                            else return false;
+                            //Max
+                            tStr = IniFileObj.Read(cstMax + k.ToString("D2"), strHdr);
+                            tDbl = ConvertToDouble(tStr.Trim());
+                            if (tDbl > double.MinValue)
+                                tdblMax = tDbl; //Max.Add(tDbl);
+                            else return false;
+                            //Expand all none used
+                            tstrNominal = "";
+                            //strNominal.Add("");
+                        }
+                        if (tStr.ToLower() == "text")
+                        {
+                            //Nominal
+                            tStr = IniFileObj.Read(cstNominal + k.ToString("D2"), strHdr);
+                            tStr = tStr.Replace("\"", "");
+                            tstrNominal = tStr.Trim(); //strNominal.Add(tStr.Trim());
+                            //Expand all none used
+                            tdblMin = 0; //Min.Add(0);
+                            tdblMax = 0; //Max.Add(0);
+                        }
+                        if (tStr.ToLower() == "ignore")
+                        {
+                            tstrNominal = "";  //strNominal.Add("");
+                            tdblMin = 0; //Min.Add(0);
+                            tdblMax = 0; //Max.Add(0);
+                        }
+                        //Add data to structure
+                        tiniFileEntry.AddNumberValues(tdblMin, tdblMax, tstrNominal, tstrInfoType);
+                    }
+                }
+                return true;
+            }
+            else return false;
+        }
+    }
+
+    // File Sub level
+    public class clsIniFileEntry
+    {
+        //Constants for ini-file
+        //public const 
+        public const string cstNominal = "Nominal";         //Nominal00
+        public const string cstMin = "Min";                 //Min00
+        public const string cstMax = "Max";                 //Max00
+        public const string cstInfoType = "InfoType";       //InfoType00
+
+        public string strHeader;
+
         //Variables concerning the format of the line - read from the ini-file
         public char DividerL0; //DividerL0=9  //Tab
         public char DividerL1; //DividerL1=34 //"
         public bool ConSeqDiv; //ConSeqDiv=true
-        public int FirstLine;  //FirstLine=1
+        public int FirstHdrLine;  //FirstLine=1
+        public int FirstDataLine;  //FirstLine=2
+        public string IniFileName;
         public string FilePattern;
         public string FileName;
         public string FilePath;
-        public int UpdateFreqMS;
-        public int ErrorDisplayDelay;
-        public int ErrorDisplayDelayCnt;
 
         //Variables concerning values read - read from the ini-file
         //public List<double> dblNominal; //Nominal00=10
@@ -824,19 +1340,17 @@ namespace EMCUpdate
         public List<int> PrevCorrects;
         public List<int> PrevWrongs;
 
-        public clsFileInfo()
+        public clsIniFileEntry()
         {
             //Variables concerning the format of the line - read from the ini-file
-            DividerL0 = '\t'; //DividerL0=9  //Tab
-            DividerL1 = '\"'; //DividerL1=34 //"
-            ConSeqDiv = true; //ConSeqDiv=true
-            FirstLine = 1;    //FirstLine=1
-            FilePattern = "*.txt";
-            FileName = "MyTest.txt";
+            DividerL0 = '\0';   //DividerL0=9  //Tab
+            DividerL1 = '\0';   //DividerL1=34 //"
+            ConSeqDiv = false;  //ConSeqDiv=true
+            FirstHdrLine = -1;  //FirstHdrLine=1
+            FirstDataLine = -2; //FirstDataLine=2
+            FilePattern = "";
+            FileName = "";
             FilePath = "";
-            UpdateFreqMS = 200;
-            ErrorDisplayDelay = (1000 / UpdateFreqMS) * 2;
-            ErrorDisplayDelayCnt = 0;
 
             //Variables concerning values read - read from the ini-file
             strNominal = new List<string>();
@@ -853,56 +1367,11 @@ namespace EMCUpdate
 
         public void ResetAll()
         {
-            //Variables concerning the format of the line - read from the ini-file
-            DividerL0 = '\t'; //DividerL0=9  //Tab
-            DividerL1 = '\"'; //DividerL1=34 //"
-            ConSeqDiv = true; //ConSeqDiv=true
-            FirstLine = 1;    //FirstLine=1
-            FilePattern = "*.txt";
-            FileName = "MyTest.txt";
-            FilePath = "";
-            UpdateFreqMS = 200;
-            ErrorDisplayDelay = (1000 / UpdateFreqMS) * 2;
-            ErrorDisplayDelayCnt = 0;
-
             //Variables concerning values read - read from the ini-file
             strNominal.Clear(); Min.Clear(); Max.Clear(); InfoType.Clear();
 
             //Results from file reading
             Corrects.Clear(); Wrongs.Clear(); PrevCorrects.Clear(); PrevWrongs.Clear();
-        }
-
-        public void AddNumberValues(double tMin, double tMax, string tStrNom, string tInfoType)
-        {
-            Min.Add(tMin);
-            Max.Add(tMax);
-            strNominal.Add(tStrNom);
-            InfoType.Add(tInfoType);
-        }
-
-        public void SetFormatValues(char tDividerL0, char tDividerL1, bool tConSeqDiv, int tFirstLine)
-        {
-            DividerL0 = tDividerL0;
-            DividerL1 = tDividerL1;
-            ConSeqDiv = tConSeqDiv;
-            FirstLine = tFirstLine;
-        }
-
-        public bool SetFilenameUpdate(string tFileName, string tFilePattern, int tUpdateFreqMS)
-        {
-            //if(File.Exists(tFilePattern) == true)
-            tFileName = tFileName.Trim();
-            tFilePattern = tFilePattern.Trim();
-            if (tFilePattern != "")
-            {
-                FileName = tFileName;
-                FilePattern = tFilePattern;
-                UpdateFreqMS = tUpdateFreqMS;
-                ErrorDisplayDelay = (1000 / UpdateFreqMS) * 2;
-                ErrorDisplayDelayCnt = 0;
-                return true;
-            }
-            return false;
         }
 
         public void ResetCompareResults()
@@ -922,6 +1391,37 @@ namespace EMCUpdate
             }
         }
 
+        public void SetFormatValues(char tDividerL0, char tDividerL1, bool tConSeqDiv, int tFirstHdrLine, int tFirstDataLine)
+        {
+            DividerL0 = tDividerL0;
+            DividerL1 = tDividerL1;
+            ConSeqDiv = tConSeqDiv;
+            FirstHdrLine = tFirstHdrLine;
+            FirstDataLine = tFirstDataLine;
+        }
+
+        public bool SetFilenameUpdate(string tFilePath, string tFilePattern)
+        {
+            //if(File.Exists(tFilePattern) == true)
+            tFilePath = tFilePath.Trim();
+            tFilePattern = tFilePattern.Trim();
+            if (tFilePattern != "")
+            {
+                FilePath = tFilePath;
+                FilePattern = tFilePattern;
+                return true;
+            }
+            return false;
+        }
+
+        public void AddNumberValues(double tMin, double tMax, string tStrNom, string tInfoType)
+        {
+            Min.Add(tMin);
+            Max.Add(tMax);
+            strNominal.Add(tStrNom);
+            InfoType.Add(tInfoType);
+        }
+
         public double ConvertToDouble(string InValueString)
         {
             double tDbl;
@@ -937,6 +1437,7 @@ namespace EMCUpdate
         ///     F00_HdrText00="Net"
         ///     F00_OutText00="Net"
         ///     F00_InfoType00=Text
+        ///     If tstrConfigIniPath is left empty, the preset is used
         /// </summary>
         /// <param name="tstrConfigIniPath"></param>
         /// <param name="tFileIndex"></param>
@@ -946,48 +1447,21 @@ namespace EMCUpdate
         {
             //Retrieve replace strings
             bool bolFormatExists = false;
-            string strFile = cstFileHdr + tFileIndex.ToString("D2");
-            if (File.Exists(tstrConfigIniPath) == true)
+
+            if (tstrConfigIniPath != "") IniFileName = tstrConfigIniPath;
+            if (File.Exists(IniFileName) == true)
             {
-                IniFile tMyIniRead = new IniFile(tstrConfigIniPath); //IniFile
+                IniFile tMyIniRead = new IniFile(IniFileName); //IniFile
 
                 bolFormatExists = tMyIniRead.KeyExists(cstFilePattern, strFile);
                 if (bolFormatExists == true)
                 {
-                    //FilePattern and FilePath
-                    FilePattern = tMyIniRead.Read(cstFilePattern, strFile);
-                    FilePattern = FilePattern.Trim();
-                    FilePath = tMyIniRead.Read(cstFilePath, strFile);
-                    FilePath = FilePath.Trim();
-
-                    //Dividers
-                    string tStr = tMyIniRead.Read(cstDivider + "L0", strFile);
-                    double tDbl = ConvertToDouble(tStr.Trim());
-                    if (tDbl > double.MinValue) DividerL0 = Convert.ToChar((int)tDbl);
-                    else return false;
-
-                    tStr = tMyIniRead.Read(cstDivider + "L1", strFile);
-                    tDbl = ConvertToDouble(tStr.Trim());
-                    if (tDbl > double.MinValue) DividerL1 = Convert.ToChar((int)tDbl);
-                    else return false;
-
-                    //ConSeqDiv
-                    tStr = tMyIniRead.Read(cstConSeqDiv, strFile);
-                    if (tStr.ToLower() == "true") ConSeqDiv = true;
-                    else if (tStr.ToLower() == "false") ConSeqDiv = false;
-                    else return false;
-
-                    //Firstline
-                    tStr = tMyIniRead.Read(cstFirstLine, strFile);
-                    tDbl = ConvertToDouble(tStr.Trim());
-                    if (tDbl > double.MinValue) FirstLine = Convert.ToChar((int)tDbl);
-                    else return false;
-
+                    string tStr = ""; double tDbl = -1;
                     //Numbered entries
                     bool MoreEntries = true;
                     int k = 0;
                     MoreEntries = tMyIniRead.KeyExists(cstInfoType + k.ToString("D2"), strFile);
-                    while(MoreEntries == true)
+                    while (MoreEntries == true)
                     {
                         tStr = tMyIniRead.Read(cstInfoType + k.ToString("D2"), strFile);
                         InfoType.Add(tStr.Trim());
@@ -1026,7 +1500,9 @@ namespace EMCUpdate
                         MoreEntries = tMyIniRead.KeyExists(cstInfoType + k.ToString("D2"), strFile);
                     }
                 }
+                else return false;
             }
+            else return false;
             return bolFormatExists;
         }
     }
