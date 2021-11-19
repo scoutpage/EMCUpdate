@@ -8,9 +8,5 @@
         <CheckBox x:Name="chkStop" Content="Stop" HorizontalAlignment="Left" Margin="171,10,0,0" VerticalAlignment="Top" Click="chkStop_Click" FontSize="18"/>
         <TextBlock x:Name="tblTest" HorizontalAlignment="Left" Height="205" Margin="10,107,0,0" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" Width="497" Background="Red" FontSize="26"/>
         <Button x:Name="btnUpdateFile" Content="Test2: Update File" HorizontalAlignment="Left" Height="20" Margin="402,10,0,0" VerticalAlignment="Top" Width="105" Click="btnUpdateFile_Click"/>
-        <Button x:Name="btnApplySettings" Content="Apply" HorizontalAlignment="Left" Height="20" Margin="451,37,0,0" VerticalAlignment="Top" Width="56" Click="btnTest_Click" RenderTransformOrigin="2.403,2.478"/>
-        <ComboBox x:Name="cboDivL0" HorizontalAlignment="Left" Height="20" Margin="171,37,0,0" VerticalAlignment="Top" Width="100"/>
-        <ComboBox x:Name="cboDivL1" HorizontalAlignment="Left" Height="20" Margin="276,37,0,0" VerticalAlignment="Top" Width="100"/>
-        <ComboBox x:Name="cboConSeqDiv" HorizontalAlignment="Left" Height="20" Margin="381,37,0,0" VerticalAlignment="Top" Width="65"/>
     </Grid>
 </Window>

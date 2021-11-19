@@ -30,10 +30,8 @@ namespace EMCUpdate
     public partial class MainWindow : Window
     {
         BackgroundWorker bw = new BackgroundWorker();
-        List<clsIniFileTopLevel> arrIniObj = new List<clsIniFileTopLevel>();
+        clsIniFileTopLevel AllFiles;
 
-        clsIniFileTopLevel BWInput1;
-        clsIniFileTopLevel BWInput2;
         bool StopMonitoring;
         bool ErrorDuringFileRead;
 
@@ -59,9 +57,7 @@ namespace EMCUpdate
             EMCMainForm.Title = "EMCUpdate - Idle";
 
             //--------------------------------------------------------
-            AddToComboBoxDividerChars(cboDivL0);
-            AddToComboBoxDividerChars(cboDivL1);
-            AddToComboBoxConSeqDiv(cboConSeqDiv);
+            AllFiles = new clsIniFileTopLevel();
         }
 
         private void AddToComboBoxDividerChars(System.Windows.Controls.ComboBox tComboBox)
@@ -334,23 +330,34 @@ namespace EMCUpdate
         {
             bool MoreEntries = false;
             int EntryIndex = 1;
-            clsIniFileTopLevel tIniElement;
 
-            tIniElement = new clsIniFileTopLevel(); tIniElement.ResetAll();
-            arrIniObj.Clear();
+            AllFiles.ResetAll();
 
-            MoreEntries = tIniElement.ReadIniFile(InFileName, EntryIndex);
+            InFileName = InFileName;
 
+            MoreEntries = AllFiles.ReadIniFile(InFileName);
+
+            return false;
+
+            clsIniFileEntry F1 = AllFiles.iniFileEntries[0];
+            clsIniFileEntry F2 = AllFiles.iniFileEntries[1];
+            //InvestigateFile(ref ccc.iniFileEntries[0]);
+            InvestigateFile(ref F1);
+
+            int eee = 0;
+            eee++;
+
+            /*
             while (MoreEntries == true)
             {
                 arrIniObj.Add(tIniElement);
                 tIniElement = new clsIniFileTopLevel(); tIniElement.ResetAll();
                 EntryIndex++;
                 MoreEntries = tIniElement.ReadIniFile(InFileName, EntryIndex);
-        }
-            while (MoreEntries == true);
+            }
+            while (MoreEntries == true) ;
 
-            if(EntryIndex > 1) return true;
+            if (EntryIndex > 1) return true;
             return false;
 
             clsIniFileTopLevel tBWInput1 = new clsIniFileTopLevel();
@@ -366,6 +373,7 @@ namespace EMCUpdate
             tBWInput1.AddNumberValues(0, 0, "Rigtigt", "Text");
             tBWInput1.ResetCompareResults();
             BWInput1 = tBWInput1;
+            */
             return true;
         }
 
@@ -407,36 +415,39 @@ namespace EMCUpdate
             return regex.IsMatch(filename);
         }
 
-        void FindFile(ref clsIniFileTopLevel tBWInput)
+        void FindFiles(ref clsIniFileTopLevel tAllFiles)
         {
-            tBWInput.FilePath = tBWInput.FilePath.Trim();
-            if (Directory.Exists(tBWInput.FilePath) == false)
-            { return; }
-            else
+            for(int j = 0; j < tAllFiles.iniFileEntries.Count; j++)
             {
-                //Find all files with the search pattern
-                string[] tFiles = Directory.GetFiles(tBWInput.FilePath, tBWInput.FilePattern);
-
-                for (int k = 0; k < tFiles.Length; k++)
-                    Console.WriteLine(k.ToString() + ": " + tFiles[k]);
-                
-                int SelectedItem = 0;
-                if (tFiles.Length == 0) return;
+                AllFiles.iniFileEntries[j].FilePath = AllFiles.iniFileEntries[j].FilePath.Trim();
+                if (Directory.Exists(AllFiles.iniFileEntries[j].FilePath) == false)
+                { return; }
                 else
                 {
-                    DateTime CurrFFD = DateTime.MinValue;
-                    for (int i = 0; i < tFiles.Length; i++)
+                    //Find all files with the search pattern
+                    string[] tFiles = Directory.GetFiles(AllFiles.iniFileEntries[j].FilePath, AllFiles.iniFileEntries[j].FilePattern);
+
+                    for (int k = 0; k < tFiles.Length; k++)
+                        Console.WriteLine(k.ToString() + ": " + tFiles[k]);
+
+                    int SelectedItem = 0;
+                    if (tFiles.Length == 0) return;
+                    else
                     {
-                        //Check if its a new date
-                        // Less than zero  t1 is earlier than t2.
-                        // Zero t1 is the same as t2.
-                        // Greater than zero   t1 is later than t2.
-                        int tInt = CmpFilenameDate(ref CurrFFD, tFiles[i]);
-                        if (tInt > 0) SelectedItem = i;
+                        DateTime CurrFFD = DateTime.MinValue;
+                        for (int i = 0; i < tFiles.Length; i++)
+                        {
+                            //Check if its a new date
+                            // Less than zero  t1 is earlier than t2.
+                            // Zero t1 is the same as t2.
+                            // Greater than zero   t1 is later than t2.
+                            int tInt = CmpFilenameDate(ref CurrFFD, tFiles[i]);
+                            if (tInt > 0) SelectedItem = i;
+                        }
                     }
+                    Console.WriteLine("Chosen: " + tFiles[SelectedItem]);
+                    AllFiles.iniFileEntries[j].FileName = tFiles[SelectedItem];
                 }
-                Console.WriteLine("Chosen: " + tFiles[SelectedItem]);
-                tBWInput.FileName = tFiles[SelectedItem];
             }
         }
 
@@ -507,6 +518,7 @@ namespace EMCUpdate
 
         private void PrintBWInputResults(string tStr, clsIniFileTopLevel tBWInput)
         {
+            /*
             Console.WriteLine("-" + tStr + "-");
 
             Console.Write("Corr:\t");
@@ -528,116 +540,104 @@ namespace EMCUpdate
             for (int i = 0; i < tBWInput.strNominal.Count; i++)
                 Console.Write(tBWInput.PrevWrongs[i].ToString() + "\t");
             Console.Write("\n");
+            */
         }
 
-        private bool InvestigateFile(ref clsIniFileTopLevel tBWInput)
+        private bool InvestigateFile(ref clsIniFileEntry tFileEntry)
         {
             int NewStartLinePos = 0;
             int NewEndLinePos = 0;
             bool IsEndOfString = false;
             string LineString;
 
-            string teststuff = "AAA";
-
             try
             {
-                teststuff = "A0";
                 //Read entire file into string
-                string CompleteFileText = ReadCompleteFileToString(tBWInput.FileName);
-                teststuff = "A1";
+                string CompleteFileText = ReadCompleteFileToString(tFileEntry.FileName);
                 //Go through the entire file
                 if (CompleteFileText != "")
                 {
-                    teststuff = "A2";
-                    for (int i = 0; i < BWInput1.strNominal.Count; i++)
-                    {   BWInput1.Corrects[i] = 0; BWInput1.Wrongs[i] = 0;
+                    for (int i = 0; i < tFileEntry.strNominal.Count; i++)
+                    {
+                        tFileEntry.PrevCorrects[i] = tFileEntry.Corrects[i]; tFileEntry.PrevWrongs[i] = tFileEntry.Wrongs[i];
+                        tFileEntry.Corrects[i] = 0; tFileEntry.Wrongs[i] = 0;
                     }
-                    teststuff = "A3";
                     //Lines - read until first line
                     int LineCnt = 0;
-                    for(int i = 0; i < tBWInput.FirstHdrLine; i++)
+                    for (int i = 0; i < tFileEntry.FirstHdrLine; i++)
                     {
                         LineString = RetLine(CompleteFileText, NewStartLinePos, ref NewEndLinePos, ref IsEndOfString);
                         LineCnt++;
                         NewStartLinePos = NewEndLinePos;
                         if (IsEndOfString == true) return false;
-                        teststuff = "A4";
                     }
-                    teststuff = "A5";
                     //Go through all lines
                     LineString = RetLine(CompleteFileText, NewStartLinePos, ref NewEndLinePos, ref IsEndOfString);
                     NewStartLinePos = NewEndLinePos;
-                    teststuff = "A6";
                     while (IsEndOfString == false)
                     {
-                        teststuff = "A6";
                         bool bCorrects = false;
                         bool bWrongs = false;
                         //Interpret line
                         LineString = LineString.Trim();
                         List<int> StartPos = new List<int>();
                         //Find all words in line
-                        string[] tWords = LineParser(LineString, tBWInput.DividerL0, tBWInput.DividerL1, tBWInput.ConSeqDiv, ref StartPos);
-                        teststuff = "A7";
+                        string[] tWords = LineParser(LineString, tFileEntry.DividerL0, tFileEntry.DividerL1, tFileEntry.ConSeqDiv, ref StartPos);
                         //Go through all the words found
                         if (tWords == null) return true;
                         for (int i = 0; i < tWords.Length; i++)
                         {
-                            teststuff = "A8";
                             bCorrects = false;
                             bWrongs = false;
-                            string tInfoType = tBWInput.InfoType[i].Trim(); tInfoType = tInfoType.ToLower();
+                            string tInfoType = tFileEntry.InfoType[i].Trim(); tInfoType = tInfoType.ToLower();
                             if (tInfoType == "number")
                             {
-                                teststuff = "A9";
                                 tWords[i] = tWords[i].Trim();
                                 double tDbl = ConvertToDouble(tWords[i]);
-                                teststuff = "A10";
                                 //Compare results
-                                if (tDbl > tBWInput.Min[i] && tDbl < tBWInput.Max[i])
-                                {   bCorrects = true; bWrongs = false;
+                                if ((tDbl >= tFileEntry.Min[i]) && (tDbl <= tFileEntry.Max[i]))
+                                {
+                                    bCorrects = true; bWrongs = false;
                                 }
                                 else
-                                {   bCorrects = false; bWrongs = true;
+                                {
+                                    bCorrects = false; bWrongs = true;
                                 }
-                                teststuff = "A11";
                             }
                             if (tInfoType == "text")
                             {
                                 tWords[i] = tWords[i].Trim();
-                                teststuff = "A12";
 
                                 //Compare results
-                                if (tWords[i] == tBWInput.strNominal[i])
-                                {   bCorrects = true; bWrongs = false;
+                                if (tWords[i] == tFileEntry.strNominal[i])
+                                {
+                                    bCorrects = true; bWrongs = false;
                                 }
                                 else
-                                {   bCorrects = false; bWrongs = true;
+                                {
+                                    bCorrects = false; bWrongs = true;
                                 }
-                                teststuff = "A13";
                             }
                             //if (tInfoType == "ignore") { }
                             //Log results
                             //  Log to vars
-                            if (bCorrects == true) tBWInput.Corrects[i]++;
-                            if (bWrongs == true) tBWInput.Wrongs[i]++;
+                            if (bCorrects == true) tFileEntry.Corrects[i]++;
+                            if (bWrongs == true) tFileEntry.Wrongs[i]++;
                         }
 #if (false)
                         PrintBWInputResults(LineString);
 #endif
-                        teststuff = "A14";
                         //Read next line
                         LineString = RetLine(CompleteFileText, NewStartLinePos, ref NewEndLinePos, ref IsEndOfString);
-                        teststuff = "A15";
                         NewStartLinePos = NewEndLinePos;
                         if (LineString.Trim() == "") IsEndOfString = true;
                     }
                 }
                 return true;
             }
-            catch(System.IO.IOException)
+            catch (System.IO.IOException)
             {
-                Console.WriteLine("The things are not the way they are supposed to be: " + teststuff);
+                //Console.WriteLine("The things are not the way they are supposed to be: " + teststuff);
                 return false;
             }
             return true;
@@ -646,37 +646,53 @@ namespace EMCUpdate
         private void UpdateGUI(object sender, ProgressChangedEventArgs e)
         {
             //Make the screen red if error
-            for (int i = 0; i < BWInput1.strNominal.Count; i++)
-            {
-                if (BWInput1.Wrongs[i] > BWInput1.PrevWrongs[i])
-                {
-                    BWInput1.ErrorDisplayDelayCnt = BWInput1.ErrorDisplayDelay;
-                }
-                //Reset PrevValues
-                BWInput1.PrevCorrects[i] = BWInput1.Corrects[i];
-                BWInput1.PrevWrongs[i] = BWInput1.Wrongs[i];
-            }
+            bool MakeScreenRed = false;
 
-            if (BWInput1.ErrorDisplayDelayCnt > 0)
+            //Goto each file
+            for (int j = 0; j < AllFiles.iniFileEntries.Count; j++)
             {
-                BWInput1.ErrorDisplayDelayCnt--;
+                clsIniFileEntry tFileEntry = AllFiles.iniFileEntries[j];
+                for (int i = 0; i < tFileEntry.strNominal.Count; i++)
+                {
+                    if (tFileEntry.Wrongs[i] > tFileEntry.PrevWrongs[i])
+                    {
+                        //BWInput1.ErrorDisplayDelayCnt = BWInput1.ErrorDisplayDelay;
+                        MakeScreenRed = true;
+                    }
+                    //Reset PrevValues
+                    tFileEntry.PrevCorrects[i] = tFileEntry.Corrects[i];
+                    tFileEntry.PrevWrongs[i] = tFileEntry.Wrongs[i];
+                }
+            }
+            if (MakeScreenRed == true)
+                AllFiles.ErrorDisplayDelayCnt = AllFiles.ErrorDisplayDelay;
+
+            if (AllFiles.ErrorDisplayDelayCnt > 0)
+            {
+                AllFiles.ErrorDisplayDelayCnt--;
                 tblTest.Background = Brushes.Red;
                 //tblTest.Background = Brushes.White;
             }
-            else 
+            else
                 tblTest.Background = Brushes.White;
 
-            string tStr = DateTime.Now.ToString() + "\n" + "Correct/Wrong:\n";
-            if (ErrorDuringFileRead == true)
-                tStr += "IO-Exception added.";
-            else
+            string tStr = "";
+            tStr = DateTime.Now.ToString() + "\n" + "Correct/Wrong:\n";
+            for (int j = 0; j < AllFiles.iniFileEntries.Count; j++)
             {
-                for(int i = 0; i < BWInput1.strNominal.Count; i++)
+                clsIniFileEntry tFileEntry = AllFiles.iniFileEntries[j];
+                if (ErrorDuringFileRead == true)
+                    tStr += "IO-Exception added.";
+                else
                 {
-                    if(i < BWInput1.strNominal.Count - 1)
-                        tStr += BWInput1.Corrects[i].ToString() + "/" + BWInput1.Wrongs[i].ToString() + " | ";
-                    else
-                        tStr += BWInput1.Corrects[i].ToString() + "/" + BWInput1.Wrongs[i].ToString();
+                    for (int i = 0; i < tFileEntry.strNominal.Count; i++)
+                    {
+                        if (i < tFileEntry.strNominal.Count - 1)
+                            tStr += tFileEntry.Corrects[i].ToString() + "/" + tFileEntry.Wrongs[i].ToString() + " | ";
+                        else
+                            tStr += tFileEntry.Corrects[i].ToString() + "/" + tFileEntry.Wrongs[i].ToString();
+                    }
+                    tStr += "\n";
                 }
             }
             tblTest.Text = tStr;
@@ -702,10 +718,14 @@ namespace EMCUpdate
                 // Less than zero  t1 is earlier than t2.
                 // Zero t1 is the same as t2.
                 // Greater than zero   t1 is later than t2.
-                if(CmpFilenameDate(ref LastFileDate, BWInput1.FileName) > 0)
+                for (int j = 0; j < AllFiles.iniFileEntries.Count; j++)
                 {
-                    Console.WriteLine("Updated: {0} The last write time for this file was {1}.", tnow, LastFileDate);
-                    InvestigateFile(ref BWInput1);
+                    clsIniFileEntry tFileEntry = AllFiles.iniFileEntries[j];
+                    //if (CmpFilenameDate(ref LastFileDate, tFileEntry.FileName) > 0)
+                    {
+                        Console.WriteLine("Updated: {0} The last write time for this file was {1}.", tnow, LastFileDate);
+                        InvestigateFile(ref tFileEntry);
+                    }
                 }
 
                 //Make sure that the BWorker stops
@@ -715,10 +735,9 @@ namespace EMCUpdate
                     return;
                 }
                 worker.ReportProgress(Rnd.Next());
-
-                Thread.Sleep(BWInput1.UpdateFreqMS);
+                Thread.Sleep(AllFiles.UpdateFreqMS);
             }
-#if (false)
+#if (true)
             //while (chkStop.IsChecked == false)
             while (true)
             {
@@ -768,7 +787,7 @@ namespace EMCUpdate
 
         private void chkStop_Click(object sender, RoutedEventArgs e)
         {
-            //if(chkStop.IsChecked == true)
+            if(chkStop.IsChecked == true)
             {
                 if (bw.IsBusy == true)
                 {
@@ -819,7 +838,7 @@ namespace EMCUpdate
             //If ConSeq - remove space in both ends
             if (ConSeqChar == true)
             {
-                if(csvText[0] == L1Char) tokens.Add("");
+                if (csvText[0] == L1Char) tokens.Add("");
                 csvText = csvText.Trim(L1Char);
             }
             while (current < csvText.Length)
@@ -891,35 +910,7 @@ namespace EMCUpdate
 
         private void btnTest_Click(object sender, RoutedEventArgs e)
         {
-            int i = 34; char c;
-            c = Convert.ToChar(34); Console.WriteLine(c.ToString());
-            c = Convert.ToChar(9); Console.WriteLine(c.ToString());
-            c = Convert.ToChar(45); Console.WriteLine(c.ToString());
-            c = Convert.ToChar(65); Console.WriteLine(c.ToString());
-            Console.WriteLine("asdfasdfasfasfasdfas");
-
-            double aa = 65;
-            char s = Convert.ToChar((int)aa); Console.WriteLine(s.ToString());
-
-
-            clsFileInfo ddd = new clsFileInfo();
-
-            ddd.ReadIniFile(@"j:\Docs\VSPrj\EMCUpdate\EMCUpdate\bin\Debug\Values.ini", 1);
-
-            return;
-            ReadIniFile("");
-            FindFile(ref BWInput1);
-
-            return;
-            string t1, t2;
-            t1 = "111.txt"; t2 = "*"; Console.WriteLine(t1 + "/" + t2 + ": " + FilenameMatchesPattern(t1, t2).ToString());
-            t1 = "abc48235.txt"; t2 = "abc*"; Console.WriteLine(t1 + "/" + t2 + ": " + FilenameMatchesPattern(t1, t2).ToString());
-            t1 = "abc48235.txt"; t2 = "abc*.*"; Console.WriteLine(t1 + "/" + t2 + ": " + FilenameMatchesPattern(t1, t2).ToString());
-            t1 = "789abc456.txt"; t2 = "*abc*.*"; Console.WriteLine(t1 + "/" + t2 + ": " + FilenameMatchesPattern(t1, t2).ToString());
-            t1 = "789abc456.txt"; t2 = "*abc*"; Console.WriteLine(t1 + "/" + t2 + ": " + FilenameMatchesPattern(t1, t2).ToString());
-
-            t1 = "789abc456.txt"; t2 = "*abc7*"; Console.WriteLine(t1 + "/" + t2 + ": " + FilenameMatchesPattern(t1, t2).ToString());
-            t1 = "789abc456.txt"; t2 = "abc*"; Console.WriteLine(t1 + "/" + t2 + ": " + FilenameMatchesPattern(t1, t2).ToString());
+            ReadIniFile("Values.ini");
         }
 
         string RetLine(string InText, int StartIndex, ref int NewStartIndex, ref bool IsEndOfString)
@@ -978,7 +969,7 @@ namespace EMCUpdate
 
         private void btnStartMonitoring_Click(object sender, RoutedEventArgs e)
         {
-            if(bw.IsBusy == false)
+            if (bw.IsBusy == false)
             {
                 // Create an object and pass it to ThreadPool worker thread
                 //clsFileInfo p = FillFileInfo(@"d:\Docs\Docs\ProgWork\VS\Visual Studio 2013\Projects\EMCUpdate\EMCUpdate\bin\Debug\MyTest.txt");
@@ -986,16 +977,18 @@ namespace EMCUpdate
                 chkStop.IsChecked = false;
                 btnStartMonitoring.IsEnabled = false;
 
-                if (BWInput1 == null) BWInput1 = new clsIniFileTopLevel();
-                else BWInput1.ResetAll();
-                //string IniFilePath = @"d:\Docs\Docs\ProgWork\VS\Visual Studio 2013\Projects\EMCUpdate\EMCUpdate\bin\Debug\Values.ini";
-                string IniFilePath = @"j:\Docs\VSPrj\EMCUpdate\EMCUpdate\bin\Debug\Values.ini";
+                //string IniFilePath = @"j:\Docs\VSPrj\EMCUpdate\EMCUpdate\bin\Debug\Values.ini";
+                string IniFilePath = @"Values.ini";
                 if (!File.Exists(IniFilePath)) return; //Leave if inifile does not exists
-                BWInput1.ReadIniFile(IniFilePath, 1);
+                ReadIniFile(IniFilePath);
+                FindFiles(ref AllFiles);
 
-                FindFile(ref BWInput1);
-                BWInput1.ResetCompareResults();
-                InvestigateFile(ref BWInput1);
+                for (int j = 0; j < AllFiles.iniFileEntries.Count; j++)
+                {
+                    clsIniFileEntry Fx = AllFiles.iniFileEntries[0];
+                    Fx.ResetCompareResults();
+                    InvestigateFile(ref Fx);
+                }
 
                 //if(bw.IsBusy == false)
                 bw.RunWorkerAsync();
@@ -1013,6 +1006,7 @@ namespace EMCUpdate
 
         private void btnUpdateFile_Click(object sender, RoutedEventArgs e)
         {
+            /*
             string path = BWInput1.FileName;
             // This text is added only once to the file.
             if (File.Exists(path))
@@ -1029,16 +1023,19 @@ namespace EMCUpdate
 
                     string tt3;
                     if (t3 < 9)
-                    {   tt3 = "Rigtigt";
+                    {
+                        tt3 = "Rigtigt";
                     }
                     else
-                    {   tt3 = "Forkert";
+                    {
+                        tt3 = "Forkert";
                     }
                     string tOut = DateTime.Now.ToString() + "\t" + tDbl.ToString("F") + "\t" + t2.ToString() + "\t" + tt3;
                     sw.WriteLine(tOut);
                     Console.WriteLine(tOut + "\t" + t3.ToString());
                 }
             }
+            */
         }
     }
 
@@ -1111,10 +1108,11 @@ namespace EMCUpdate
             ErrorDisplayDelayCnt = 0;
 
             //Variables concerning values read - read from the ini-file
-            for(int i = 0; i < iniFileEntries.Count; i++)
+            for (int i = 0; i < iniFileEntries.Count; i++)
             {
                 iniFileEntries[i].ResetAll();
             }
+            iniFileEntries.Clear();
         }
 
         public void ResetCompareResults()
@@ -1126,9 +1124,9 @@ namespace EMCUpdate
         }
 
         //-------------- Setup --------------
-        public void SetFormatValues(int tFileIndex, char tDividerL0, char tDividerL1, bool tConSeqDiv, int tFirstHdrLine, int tFirstDataLine)
+        public void SetFormatValues_NotUsed(int tFileIndex, char tDividerL0, char tDividerL1, bool tConSeqDiv, int tFirstHdrLine, int tFirstDataLine)
         {
-            if(iniFileEntries.Count > tFileIndex)
+            if (iniFileEntries.Count > tFileIndex)
             {
                 clsIniFileEntry tiniFileEntries = new clsIniFileEntry();
                 iniFileEntries.Add(tiniFileEntries);
@@ -1137,7 +1135,7 @@ namespace EMCUpdate
 
         }
 
-        public void AddNumberValues(int tFileIndex, double tMin, double tMax, string tStrNom, string tInfoType)
+        public void AddNumberValues_NotUsed(int tFileIndex, double tMin, double tMax, string tStrNom, string tInfoType)
         {
             if (iniFileEntries.Count > tFileIndex)
             {
@@ -1201,10 +1199,7 @@ namespace EMCUpdate
                 if (IniFileObj == null)
                     IniFileObj = new IniFile(IniFileName); //IniFile
 
-                //Create FileEntries
-                clsIniFileEntry tiniFileEntry = new clsIniFileEntry();
-
-                bolFormatExists = IniFileObj.KeyExists(cstFilePattern, "Main");
+                bolFormatExists = IniFileObj.KeyExists(cstUpdateFreqMS, "Main");
                 if (bolFormatExists == false) return false;
 
                 //Main
@@ -1222,32 +1217,36 @@ namespace EMCUpdate
                     ErrorDisplayDelay = Convert.ToChar((int)tDbl);
                 else return false;
 
-                //Numbered entries
+                //File Numbered entries
                 iniFileEntries.Clear(); //clear Fileentries from the start
-                bool MoreEntries = true;
-                int k = 1;
-                string strHdr = cstFileHdr + k.ToString("D2"); //Create string "FileXX"
-                MoreEntries = IniFileObj.KeyExists(cstInfoType + k.ToString("D2"), strHdr); //Look for InfoTypeXX
-                while (MoreEntries == true) //FileXX entries
+                bool MoreFileEntries = true;
+                int FileIndex = 1;
+                string strFileEntry = cstFileHdr + FileIndex.ToString("D2"); //Create string "FileXX"
+                //Check for Filepath in FileXX
+                MoreFileEntries = IniFileObj.KeyExists(cstFilePath, strFileEntry);
+                while (MoreFileEntries == true) //FileXX entries
                 {
+                    //Create FileEntries
+                    clsIniFileEntry tiniFileEntry = new clsIniFileEntry();
+
                     //Main
                     //FilePattern and FilePath
-                    string FilePattern = IniFileObj.Read(cstFilePattern, strHdr);
+                    string FilePattern = IniFileObj.Read(cstFilePattern, strFileEntry);
                     FilePattern = FilePattern.Trim();
-                    string FilePath = IniFileObj.Read(cstFilePath, strHdr);
+                    string FilePath = IniFileObj.Read(cstFilePath, strFileEntry);
                     FilePath = FilePath.Trim();
                     //Enter data into structure
                     tiniFileEntry.SetFilenameUpdate(FilePath, FilePattern);
 
                     //Dividers
                     char DividerL0 = ' '; char DividerL1 = ' ';
-                    tStr = IniFileObj.Read(cstDividerL0, strHdr);
+                    tStr = IniFileObj.Read(cstDividerL0, strFileEntry);
                     tDbl = ConvertToDouble(tStr.Trim());
                     if (tDbl > double.MinValue)
                         DividerL0 = Convert.ToChar((int)tDbl);
                     else return false;
 
-                    tStr = IniFileObj.Read(cstDividerL1, strHdr);
+                    tStr = IniFileObj.Read(cstDividerL1, strFileEntry);
                     tDbl = ConvertToDouble(tStr.Trim());
                     if (tDbl > double.MinValue)
                         DividerL1 = Convert.ToChar((int)tDbl);
@@ -1255,21 +1254,21 @@ namespace EMCUpdate
 
                     //ConSeqDiv
                     bool ConSeqDiv;
-                    tStr = IniFileObj.Read(cstConSeqDiv, strHdr);
+                    tStr = IniFileObj.Read(cstConSeqDiv, strFileEntry);
                     if (tStr.ToLower() == "true") ConSeqDiv = true;
                     else if (tStr.ToLower() == "false") ConSeqDiv = false;
                     else return false;
 
                     //FirstHdrline
                     int FirstHdrLine;
-                    tStr = IniFileObj.Read(cstFirstHdrLine, strHdr);
+                    tStr = IniFileObj.Read(cstFirstHdrLine, strFileEntry);
                     tDbl = ConvertToDouble(tStr.Trim());
                     if (tDbl > double.MinValue) FirstHdrLine = Convert.ToChar((int)tDbl);
                     else return false;
 
                     //FirstDataline
                     int FirstDataLine;
-                    tStr = IniFileObj.Read(cstFirstDataLine, strHdr);
+                    tStr = IniFileObj.Read(cstFirstDataLine, strFileEntry);
                     tDbl = ConvertToDouble(tStr.Trim());
                     if (tDbl > double.MinValue) FirstDataLine = Convert.ToChar((int)tDbl);
                     else return false;
@@ -1277,27 +1276,27 @@ namespace EMCUpdate
                     //Enter data into structure
                     tiniFileEntry.SetFormatValues(DividerL0, DividerL1, ConSeqDiv, FirstHdrLine, FirstDataLine);
 
-                    bool MoreEntries2 = true;
-                    int k2 = 0;
+                    bool MoreNomEntries = true;
+                    int NomIndex = 1;
                     //Find the "NominalXX", "MinXX", "MaxXX", "InfoTypeXX"
-                    MoreEntries2 = IniFileObj.KeyExists(cstInfoType + k.ToString("D2"), strHdr);
-                    while (MoreEntries2 == true) //FileXX entries
+                    MoreNomEntries = IniFileObj.KeyExists(cstInfoType + NomIndex.ToString("D2"), strFileEntry);
+                    while (MoreNomEntries == true) //FileXX entries
                     {
                         string tstrInfoType = "", tstrNominal = "";
                         double tdblMin = 0, tdblMax = 0;
-                        tStr = IniFileObj.Read(cstInfoType + k2.ToString("D2"), strHdr);
+                        tStr = IniFileObj.Read(cstInfoType + NomIndex.ToString("D2"), strFileEntry);
                         tstrInfoType = tStr.Trim();
                         //InfoType.Add(tStr.Trim());
                         if (tStr.ToLower() == "number")
                         {
                             //Min
-                            tStr = IniFileObj.Read(cstMin + k.ToString("D2"), strHdr);
+                            tStr = IniFileObj.Read(cstMin + NomIndex.ToString("D2"), strFileEntry);
                             tDbl = ConvertToDouble(tStr.Trim());
                             if (tDbl > double.MinValue)
                                 tdblMin = tDbl; //Min.Add(tDbl);
                             else return false;
                             //Max
-                            tStr = IniFileObj.Read(cstMax + k.ToString("D2"), strHdr);
+                            tStr = IniFileObj.Read(cstMax + NomIndex.ToString("D2"), strFileEntry);
                             tDbl = ConvertToDouble(tStr.Trim());
                             if (tDbl > double.MinValue)
                                 tdblMax = tDbl; //Max.Add(tDbl);
@@ -1309,7 +1308,7 @@ namespace EMCUpdate
                         if (tStr.ToLower() == "text")
                         {
                             //Nominal
-                            tStr = IniFileObj.Read(cstNominal + k.ToString("D2"), strHdr);
+                            tStr = IniFileObj.Read(cstNominal + NomIndex.ToString("D2"), strFileEntry);
                             tStr = tStr.Replace("\"", "");
                             tstrNominal = tStr.Trim(); //strNominal.Add(tStr.Trim());
                             //Expand all none used
@@ -1324,11 +1323,21 @@ namespace EMCUpdate
                         }
                         //Add data to structure
                         tiniFileEntry.AddNumberValues(tdblMin, tdblMax, tstrNominal, tstrInfoType);
+                        NomIndex++;
+                        MoreNomEntries = IniFileObj.KeyExists(cstInfoType + NomIndex.ToString("D2"), strFileEntry);
                     }
+                    iniFileEntries.Add(tiniFileEntry);
+                    FileIndex++;
+                    //Check for Filepath in FileXX
+                    strFileEntry = cstFileHdr + FileIndex.ToString("D2"); //Create string "FileXX"
+                    MoreFileEntries = IniFileObj.KeyExists(cstFilePath, strFileEntry); //Look for FilePath
                 }
+                int eee = 4;
+                eee++;
                 return true;
             }
-            else return false;
+            else 
+                return false;
         }
     }
 
@@ -1354,9 +1363,6 @@ namespace EMCUpdate
         public string FilePattern;
         public string FileName;
         public string FilePath;
-        public int UpdateFreqMS;
-        public int ErrorDisplayDelay;
-        public int ErrorDisplayDelayCnt;
 
         //Variables concerning values read - read from the ini-file
         //public List<double> dblNominal; //Nominal00=10
@@ -1382,9 +1388,6 @@ namespace EMCUpdate
             FilePattern = "";
             FileName = "";
             FilePath = "";
-            UpdateFreqMS = 200;
-            ErrorDisplayDelay = (1000 / UpdateFreqMS) * 2;
-            ErrorDisplayDelayCnt = 0;
 
             //Variables concerning values read - read from the ini-file
             strNominal = new List<string>();
@@ -1401,18 +1404,6 @@ namespace EMCUpdate
 
         public void ResetAll()
         {
-            //Variables concerning the format of the line - read from the ini-file
-            DividerL0 = '\t'; //DividerL0=9  //Tab
-            DividerL1 = '\"'; //DividerL1=34 //"
-            ConSeqDiv = true; //ConSeqDiv=true
-            FirstLine = 1;    //FirstLine=1
-            FilePattern = "*.txt";
-            FileName = "MyTest.txt";
-            FilePath = "";
-            UpdateFreqMS = 200;
-            ErrorDisplayDelay = (1000 / UpdateFreqMS) * 2;
-            ErrorDisplayDelayCnt = 0;
-
             //Variables concerning values read - read from the ini-file
             strNominal.Clear(); Min.Clear(); Max.Clear(); InfoType.Clear();
 
@@ -1428,7 +1419,7 @@ namespace EMCUpdate
             if (Corrects.Count < strNominal.Count)
             {
                 for (int j = Corrects.Count; j < strNominal.Count; j++)
-        {
+                {
                     Corrects.Add(0); Corrects[j] = 0;
                     Wrongs.Add(0); Wrongs[j] = 0;
                     PrevCorrects.Add(0); PrevCorrects[j] = 0;
@@ -1455,20 +1446,19 @@ namespace EMCUpdate
             {
                 FilePath = tFilePath;
                 FilePattern = tFilePattern;
-                UpdateFreqMS = tUpdateFreqMS;
-                ErrorDisplayDelay = (1000 / UpdateFreqMS) * 2;
-                ErrorDisplayDelayCnt = 0;
                 return true;
             }
             return false;
         }
 
         public void AddNumberValues(double tMin, double tMax, string tStrNom, string tInfoType)
-                {
+        {
             Min.Add(tMin);
             Max.Add(tMax);
             strNominal.Add(tStrNom);
             InfoType.Add(tInfoType);
+            Corrects.Add(0);     Wrongs.Add(0);
+            PrevCorrects.Add(0); PrevWrongs.Add(0);
         }
 
         public double ConvertToDouble(string InValueString)
@@ -1492,8 +1482,9 @@ namespace EMCUpdate
         /// <param name="tFileIndex"></param>
         /// <param name="tiIndex"></param>
         /// <returns></returns>
-        public bool ReadIniFile(string tstrConfigIniPath, int tFileIndex)
+        public bool ReadIniFileNotUsed(string tstrConfigIniPath)
         {
+            /*
             //Retrieve replace strings
             bool bolFormatExists = false;
 
@@ -1553,6 +1544,8 @@ namespace EMCUpdate
             }
             else return false;
             return bolFormatExists;
+            */
+            return false;
         }
     }
 }
